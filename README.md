@@ -6,10 +6,7 @@ Tiny plugin to quickly switch python virtual environments from within neovim wit
 ## Installation
 For example using [`packer`](https://github.com/wbthomason/packer.nvim):
 ```lua
-use {
-  'AckslD/swenv.nvim',
-  config = 'require("swenv").setup()',
-}
+use 'AckslD/swenv.nvim'
 ```
 
 ## Usage
