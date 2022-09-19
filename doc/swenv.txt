@@ -24,10 +24,7 @@ INSTALLATION                                              *swenv-installation*
 For example using `packer` <https://github.com/wbthomason/packer.nvim>:
 
 >
-    use {
-      'AckslD/swenv.nvim',
-      config = 'require("swenv").setup()',
-    }
+    use 'AckslD/swenv.nvim'
 <
 
 
