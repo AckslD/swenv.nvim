@@ -1,6 +1,8 @@
 # swenv.nvim
 Tiny plugin to quickly switch python virtual environments from within neovim without restarting.
 
+![gscreenshot_2022-09-19-144438](https://user-images.githubusercontent.com/23341710/191020632-543e8118-4eea-4964-8d59-1556836b929f.png)
+
 ## Installation
 For example using [`packer`](https://github.com/wbthomason/packer.nvim):
 ```lua
