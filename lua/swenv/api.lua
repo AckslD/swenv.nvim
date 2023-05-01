@@ -6,17 +6,6 @@ local ORIGINAL_PATH = vim.fn.getenv('PATH')
 
 local current_venv = nil
 
-local get_conda_base = function(conda_exe_path)
-  local parts = {}
-
-  for part in conda_exe_path:gmatch('[^/]+') do
-    table.insert(parts, part)
-  end
-  table.remove(parts) -- remove the last part
-  table.remove(parts) -- remove the second-to-last part
-  return '/' .. table.concat(parts, '/')
-end
-
 local update_path = function(path)
   vim.fn.setenv('PATH', path .. '/bin' .. ':' .. ORIGINAL_PATH)
 end
@@ -56,7 +45,7 @@ M.get_venvs = function(venvs_path)
   local venvs = {}
 
   -- CONDA
-  local conda_env_path = get_conda_base(vim.fn.getenv('CONDA_EXE')) .. '/envs'
+  local conda_env_path = Path.parent(Path.parent(Path:new(vim.fn.getenv('CONDA_EXE')))) .. '/envs'
   local conda_paths = scan_dir(conda_env_path, { depth = 1, only_dirs = true, silent = true })
 
   for _, path in ipairs(conda_paths) do
