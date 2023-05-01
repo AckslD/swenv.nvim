@@ -17,22 +17,26 @@ local get_conda_base = function(conda_exe_path)
   return '/' .. table.concat(parts, '/')
 end
 
+local update_path = function(path)
+  vim.fn.setenv('PATH', path .. '/bin' .. ':' .. ORIGINAL_PATH)
+end
+
 local set_venv = function(venv)
   if venv.source == 'conda' then
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
     vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
     vim.cmd('LspRestart')
-    -- TODO: remove old path
-    vim.fn.setenv('PATH', venv.path .. '/bin' .. ':' .. ORIGINAL_PATH)
   else
-    current_venv = venv
-    local venv_bin_path = venv.path .. '/bin'
-    vim.fn.setenv('PATH', venv_bin_path .. ':' .. ORIGINAL_PATH)
     vim.fn.setenv('VIRTUAL_ENV', venv.path)
-    if settings.post_set_venv then
-      settings.post_set_venv(venv)
-    end
+  end
+
+  current_venv = venv
+  -- TODO: remove old path
+  update_path(venv.path)
+
+  if settings.post_set_venv then
+    settings.post_set_venv(venv)
   end
 end
 
