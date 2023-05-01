@@ -26,10 +26,11 @@ local set_venv = function(venv)
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
     vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
-    vim.cmd('LspRestart')
   else
     vim.fn.setenv('VIRTUAL_ENV', venv.path)
   end
+
+  vim.cmd('LspRestart')
 
   current_venv = venv
   -- TODO: remove old path
