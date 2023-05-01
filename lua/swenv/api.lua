@@ -9,22 +9,22 @@ local current_venv = nil
 local get_conda_base = function(conda_exe_path)
   local parts = {}
 
-  for part in conda_exe_path:gmatch("[^/]+") do
+  for part in conda_exe_path:gmatch('[^/]+') do
     table.insert(parts, part)
   end
   table.remove(parts) -- remove the last part
   table.remove(parts) -- remove the second-to-last part
-  return "/" .. table.concat(parts, "/")
+  return '/' .. table.concat(parts, '/')
 end
 
 local set_venv = function(venv)
-  if venv.source == "conda" then
+  if venv.source == 'conda' then
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
-    vim.fn.setenv('CONDA_PROMPT_MODIFIER', "(" .. venv.name .. ")")
-    vim.cmd("LspRestart")
+    vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
+    vim.cmd('LspRestart')
     -- TODO: remove old path
-    local conda_base_path = get_conda_base(vim.fn.getenv("CONDA_EXE"))
+    local conda_base_path = get_conda_base(vim.fn.getenv('CONDA_EXE'))
     vim.fn.setenv('PATH', venv.path .. '/bin' .. ':' .. ORIGINAL_PATH)
   else
     current_venv = venv
@@ -52,14 +52,14 @@ M.get_venvs = function(venvs_path)
   local venvs = {}
 
   -- CONDA
-  local conda_base_path = get_conda_base(vim.fn.getenv("CONDA_EXE"))
-  local conda_paths = scan_dir(conda_base_path .. "/envs", { depth = 1, only_dirs = true, silent = true })
+  local conda_base_path = get_conda_base(vim.fn.getenv('CONDA_EXE'))
+  local conda_paths = scan_dir(conda_base_path .. '/envs', { depth = 1, only_dirs = true, silent = true })
 
   for _, path in ipairs(conda_paths) do
     table.insert(venvs, {
-      name = Path:new(path):make_relative(conda_base_path .. "/envs"),
+      name = Path:new(path):make_relative(conda_base_path .. '/envs'),
       path = path,
-      source = "conda",
+      source = 'conda',
     })
   end
 
@@ -70,7 +70,7 @@ M.get_venvs = function(venvs_path)
       -- TODO how does one get the name of the file directly?
       name = Path:new(path):make_relative(venvs_path),
       path = path,
-      source = "venv",
+      source = 'venv',
     })
   end
 
@@ -80,7 +80,9 @@ end
 M.pick_venv = function()
   vim.ui.select(settings.get_venvs(settings.venvs_path), {
     prompt = 'Select python venv',
-    format_item = function(item) return string.format('%s (%s) [%s]', item.name, item.path, item.source) end,
+    format_item = function(item)
+      return string.format('%s (%s) [%s]', item.name, item.path, item.source)
+    end,
   }, function(choice)
     if not choice then
       return
@@ -90,4 +92,3 @@ M.pick_venv = function()
 end
 
 return M
-
