@@ -56,12 +56,12 @@ M.get_venvs = function(venvs_path)
   local venvs = {}
 
   -- CONDA
-  local conda_base_path = get_conda_base(vim.fn.getenv('CONDA_EXE'))
-  local conda_paths = scan_dir(conda_base_path .. '/envs', { depth = 1, only_dirs = true, silent = true })
+  local conda_env_path = get_conda_base(vim.fn.getenv('CONDA_EXE')) .. '/envs'
+  local conda_paths = scan_dir(conda_env_path, { depth = 1, only_dirs = true, silent = true })
 
   for _, path in ipairs(conda_paths) do
     table.insert(venvs, {
-      name = Path:new(path):make_relative(conda_base_path .. '/envs'),
+      name = Path:new(path):make_relative(conda_env_path),
       path = path,
       source = 'conda',
     })
