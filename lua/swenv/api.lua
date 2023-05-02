@@ -45,7 +45,7 @@ M.get_venvs = function(venvs_path)
   local venvs = {}
 
   -- CONDA
-  local conda_env_path = Path.parent(Path.parent(Path:new(vim.fn.getenv('CONDA_EXE')))) .. '/envs'
+  local conda_env_path = Path:new(vim.fn.getenv('CONDA_EXE')):parent():parent() .. '/envs'
   local conda_paths = scan_dir(conda_env_path, { depth = 1, only_dirs = true, silent = true })
 
   for _, path in ipairs(conda_paths) do
