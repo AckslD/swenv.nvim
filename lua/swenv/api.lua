@@ -19,8 +19,6 @@ local set_venv = function(venv)
     vim.fn.setenv('VIRTUAL_ENV', venv.path)
   end
 
-  vim.cmd('LspRestart')
-
   current_venv = venv
   -- TODO: remove old path
   update_path(venv.path)
