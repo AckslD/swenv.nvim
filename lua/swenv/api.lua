@@ -11,7 +11,7 @@ local update_path = function(path)
 end
 
 local set_venv = function(venv)
-  if venv.source == 'conda' then
+  if venv.source == 'conda' or venv.source == 'micromamba' then
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
     vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
