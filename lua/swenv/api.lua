@@ -41,7 +41,7 @@ M.get_venvs = function(venvs_path)
   local scan_dir = require('plenary.scandir').scan_dir
 
   local venvs = {}
-
+  
   -- CONDA
   local conda_exe = vim.fn.getenv('CONDA_EXE')
   if conda_exe ~= vim.NIL then
@@ -53,6 +53,21 @@ M.get_venvs = function(venvs_path)
         name = Path:new(path):make_relative(conda_env_path),
         path = path,
         source = 'conda',
+      })
+    end
+  end
+  
+  --MICROMAMBA
+  local micromamba_exe = vim.fn.getenv('MAMBA_EXE')
+  if micromamba_exe ~= vim.NIL then
+    local micromamba_env_path = Path:new(vim.fn.getenv('MAMBA_ROOT_PREFIX')) .. '/envs'
+    local micromamba_paths = scan_dir(micromamba_env_path, { depth = 1, only_dirs = true, silent = true })
+
+    for _, path in ipairs(micromamba_paths) do
+      table.insert(venvs, {
+        name = Path:new(path):make_relative(micromamba_env_path),
+        path = path,
+        source = 'micromamba',
       })
     end
   end
