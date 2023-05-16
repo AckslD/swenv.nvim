@@ -1,22 +1,19 @@
 local M = require('lualine.component'):extend()
 
-local highlight = require('lualine.highlight')
-local utils = require('lualine.utils.utils')
+local default_opts = {
+  icon = "",
+  color = { fg = "#8fb55e" },
+}
 
 function M:init(options)
+  options = vim.tbl_deep_extend("keep", options or {}, default_opts)
   M.super.init(self, options)
-  self.colors = {}
-  self.color = highlight.create_component_highlight_group(
-    {fg = utils.extract_highlight_colors('WarningMsg', 'fg')},
-    'swenv',
-    self.options
-  )
 end
 
 function M:update_status()
   local venv = require('swenv.api').get_current_venv()
   if venv then
-    return string.format('%s %s', highlight.component_format_highlight(self.color), venv.name)
+    return venv.name
   else
     return ''
   end
