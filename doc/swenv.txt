@@ -41,8 +41,6 @@ To show the current venv in for example a status-line you can call
     require('swenv.api').get_current_venv()
 <
 
-For `lualine` there is already a configured component called `swenv`.
-
 
 CONFIGURATION                                 *swenv-swenv.nvim-configuration*
 
@@ -62,6 +60,35 @@ These are the defaults:
       -- Something to do after setting an environment, for example call vim.cmd.LspRestart
       post_set_venv = nil,
     })
+<
+
+
+LUALINE COMPONENT ~
+
+For `lualine` there is already a configured component called `swenv`. It
+displays an icon and the name of the activated environment.
+
+
+USAGE
+
+Add this to your `lualine` sections to use the component
+
+>lua
+    sections = {
+        ...
+        lualine_a = 'swenv' -- uses default options
+        lualine_x = { 'swenv', icon = '<icon>' } -- passing lualine component options
+        ...
+    }
+<
+
+These are the defaults options:
+
+>lua
+    {
+      icon = "",
+      color = { fg = "#8fb55e" },
+    }
 <
 
 ==============================================================================
