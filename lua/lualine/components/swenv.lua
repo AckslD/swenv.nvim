@@ -2,7 +2,7 @@ local M = require('lualine.component'):extend()
 
 local default_opts = {
   icon = "",
-  color = { fg = "#8fb55e" },
+  color = { fg = "#FFD43B" },
 }
 
 function M:init(options)
