@@ -34,7 +34,7 @@ end
 ---@param first string|nil
 ---@param second string|nil
 ---@return boolean
-local hasHighPriorityInPath = function (first, second)
+local has_high_priority_in_path = function (first, second)
   if first == nil or first == vim.NIL then
     return false
   end
@@ -52,7 +52,7 @@ M.init = function()
     vim.notify('Could not require plenary: ' .. Path, vim.log.levels.WARN)
     return
   end
-  local venv = nil
+  local venv
 
   local venv_env = vim.fn.getenv('VIRTUAL_ENV')
   if venv_env ~= vim.NIL then
@@ -64,7 +64,7 @@ M.init = function()
   end
 
   local conda_env = vim.fn.getenv('CONDA_DEFAULT_ENV')
-  if conda_env ~= vim.NIL and hasHighPriorityInPath(conda_env, venv_env) then
+  if conda_env ~= vim.NIL and has_high_priority_in_path(conda_env, venv_env) then
     venv = {
       name = conda_env,
       path = vim.fn.getenv('CONDA_PREFIX'),
