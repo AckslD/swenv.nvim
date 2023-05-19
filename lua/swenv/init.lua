@@ -8,6 +8,7 @@ end
 
 M.setup = function(opts)
   update_config(opts)
+  require('swenv.api').init()
 end
 
 return M
