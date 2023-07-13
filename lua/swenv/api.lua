@@ -34,7 +34,7 @@ end
 ---@param first string|nil
 ---@param second string|nil
 ---@return boolean
-local has_high_priority_in_path = function (first, second)
+local has_high_priority_in_path = function(first, second)
   if first == nil or first == vim.NIL then
     return false
   end
@@ -115,6 +115,28 @@ M.get_venvs = function(venvs_path)
       path = path,
       source = 'venv',
     })
+  end
+
+  -- PYEVN
+  local pyenv_root = vim.fn.getenv('PYENV_ROOT')
+  if pyenv_root ~= vim.NIL then
+    local pyenv_versions_dir = Path(pyenv_root) .. "/versions"
+    local pyenv_versions_paths = scan_dir(pyenv_versions_dir, { depth = 1, only_dirs = true, silent = true })
+    for _, path in ipairs(pyenv_versions_paths) do
+      table.insert(venvs, {
+        name = Path:new(path):make_relative(pyenv_versions_dir),
+        path = path,
+        source = 'pyenv',
+      })
+    end
+    local pyenv_venv_paths = scan_dir(pyenv_versions_dir, { depth = 1, only_dirs = false, silent = true })
+    for _, path in ipairs(pyenv_venv_paths) do
+      table.insert(venvs, {
+        name = Path:new(path):make_relative(pyenv_versions_dir),
+        path = path,
+        source = 'pyenv',
+      })
+    end
   end
 
   return venvs
