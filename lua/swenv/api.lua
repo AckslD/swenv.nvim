@@ -196,18 +196,6 @@ M.set_venv = function(name)
     set_venv(closest_match)
 end
 
--- M.auto_venv = function()
---     local venvs = settings.get_venvs(settings.venvs_path)
---     local project_dir = require("project_nvim.project").get_project_root()
---     local project_venv_name = read_venv_name(project_dir)
---     local closest_match = best_match(venvs, project_venv_name)
---     if not closest_match then
---         return
---     end
---     set_venv(closest_match)
--- end
-
-
 M.auto_venv = function()
     local loaded, project_nvim = pcall(require, "project_nvim.project")
     local venvs = settings.get_venvs(settings.venvs_path)
@@ -218,10 +206,12 @@ M.auto_venv = function()
         print("Error: failed to load the project_nvim.project module")
         return
     end
-    local project_venv_name = read_venv_name(project_dir)
-    local closest_match = best_match(venvs, project_venv_name)
-    if not closest_match then return end
-    set_venv(closest_match)
+    if project_dir then
+        local project_venv_name = read_venv_name(project_dir)
+        local closest_match = best_match(venvs, project_venv_name)
+        if not closest_match then return end
+        set_venv(closest_match)
+    end
 end
 
 return M
