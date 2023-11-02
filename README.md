@@ -46,7 +46,7 @@ require('swenv.api').set_venv('venv_fuzzy_name')
 
 ### Auto Environment
 
-Using a file named **venv** in your projects root folder, it will automatically set the
+Using a file named **.venv** in your projects root folder, it will automatically set the
 virtual-env for such environment.
 
 #### Dependency
