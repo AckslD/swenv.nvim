@@ -99,6 +99,7 @@ local get_venvs_for = function(base_path, source, opts)
         source = source,
       })
   end
+  return venvs
 end
 
 local get_conda_base_path = function()
