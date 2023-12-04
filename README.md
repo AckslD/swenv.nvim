@@ -8,6 +8,7 @@ For example using [`packer`](https://github.com/wbthomason/packer.nvim):
 ```lua
 use 'AckslD/swenv.nvim'
 ```
+Requires `plenary`.
 
 ## Usage
 Call
