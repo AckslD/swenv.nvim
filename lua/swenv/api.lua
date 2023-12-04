@@ -1,5 +1,8 @@
 local M = {}
 
+local Path = require('plenary.path')
+local scan_dir = require('plenary.scandir').scan_dir
+
 local settings = require('swenv.config').settings
 
 local ORIGINAL_PATH = vim.fn.getenv('PATH')
@@ -47,11 +50,6 @@ local has_high_priority_in_path = function(first, second)
 end
 
 M.init = function()
-  local success, Path = pcall(require, 'plenary.path')
-  if not success then
-    vim.notify('Could not require plenary: ' .. Path, vim.log.levels.WARN)
-    return
-  end
   local venv
 
   local venv_env = vim.fn.getenv('VIRTUAL_ENV')
@@ -81,64 +79,52 @@ M.get_current_venv = function()
   return current_venv
 end
 
-M.get_venvs = function(venvs_path)
-  local success, Path = pcall(require, 'plenary.path')
-  if not success then
-    vim.notify('Could not require plenary: ' .. Path, vim.log.levels.WARN)
-    return
-  end
-  local scan_dir = require('plenary.scandir').scan_dir
-
+local get_venvs_for = function(base_path, source, opts)
   local venvs = {}
-
-  -- CONDA
-  local conda_exe = vim.fn.getenv('CONDA_EXE')
-  if conda_exe ~= vim.NIL then
-    local conda_env_path = Path:new(conda_exe):parent():parent() .. '/envs'
-    local conda_paths = scan_dir(conda_env_path, { depth = 1, only_dirs = true, silent = true })
-
-    for _, path in ipairs(conda_paths) do
-      table.insert(venvs, {
-        name = Path:new(path):make_relative(conda_env_path),
-        path = path,
-        source = 'conda',
-      })
-    end
+  if base_path == nil then
+    return venvs
   end
-
-  -- VENV
-  local paths = scan_dir(venvs_path, { depth = 1, only_dirs = true, silent = true })
+  local paths = scan_dir(
+    base_path,
+    vim.tbl_extend(
+      'force',
+      { depth = 1, only_dirs = true, silent = true },
+      opts or {}
+    )
+  )
   for _, path in ipairs(paths) do
-    table.insert(venvs, {
-      -- TODO how does one get the name of the file directly?
-      name = Path:new(path):make_relative(venvs_path),
-      path = path,
-      source = 'venv',
-    })
+      table.insert(venvs, {
+        name = Path:new(path):make_relative(base_path),
+        path = path,
+        source = source,
+      })
   end
+end
 
-  -- PYEVN
+local get_conda_base_path = function()
+  local conda_exe = vim.fn.getenv('CONDA_EXE')
+  if conda_exe == vim.NIL then
+    return nil
+  else
+    return Path:new(conda_exe):parent():parent() .. '/envs'
+  end
+end
+
+local get_pyenv_base_path = function()
   local pyenv_root = vim.fn.getenv('PYENV_ROOT')
-  if pyenv_root ~= vim.NIL then
-    local pyenv_versions_dir = Path:new(pyenv_root) .. "/versions"
-    local pyenv_versions_paths = scan_dir(pyenv_versions_dir, { depth = 1, only_dirs = true, silent = true })
-    for _, path in ipairs(pyenv_versions_paths) do
-      table.insert(venvs, {
-        name = Path:new(path):make_relative(pyenv_versions_dir),
-        path = path,
-        source = 'pyenv',
-      })
-    end
-    local pyenv_venv_paths = scan_dir(pyenv_versions_dir, { depth = 1, only_dirs = false, silent = true })
-    for _, path in ipairs(pyenv_venv_paths) do
-      table.insert(venvs, {
-        name = Path:new(path):make_relative(pyenv_versions_dir),
-        path = path,
-        source = 'pyenv',
-      })
-    end
+  if pyenv_root == vim.NIL then
+    return nil
+  else
+    return Path:new(pyenv_root) .. "/versions"
   end
+end
 
+M.get_venvs = function(venvs_path)
+  local venvs = {}
+  vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
+  vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
+  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
+  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', {only_dirs = false}))
   return venvs
 end
 
