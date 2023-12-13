@@ -1,12 +1,12 @@
 local M = require('lualine.component'):extend()
 
 local default_opts = {
-  icon = "",
-  color = { fg = "#FFD43B" },
+  icon = '',
+  color = { fg = '#FFD43B' },
 }
 
 function M:init(options)
-  options = vim.tbl_deep_extend("keep", options or {}, default_opts)
+  options = vim.tbl_deep_extend('keep', options or {}, default_opts)
   M.super.init(self, options)
 end
 
