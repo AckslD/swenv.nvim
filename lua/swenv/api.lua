@@ -2,6 +2,8 @@ local M = {}
 
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
+local best_match = require('swenv.match').best_match
+local read_venv_name = require('swenv.project').read_venv_name
 
 local settings = require('swenv.config').settings
 
@@ -66,7 +68,7 @@ M.init = function()
     venv = {
       name = conda_env,
       path = vim.fn.getenv('CONDA_PREFIX'),
-      source = 'conda'
+      source = 'conda',
     }
   end
 
@@ -84,20 +86,13 @@ local get_venvs_for = function(base_path, source, opts)
   if base_path == nil then
     return venvs
   end
-  local paths = scan_dir(
-    base_path,
-    vim.tbl_extend(
-      'force',
-      { depth = 1, only_dirs = true, silent = true },
-      opts or {}
-    )
-  )
+  local paths = scan_dir(base_path, vim.tbl_extend('force', { depth = 1, only_dirs = true, silent = true }, opts or {}))
   for _, path in ipairs(paths) do
-      table.insert(venvs, {
-        name = Path:new(path):make_relative(base_path),
-        path = path,
-        source = source,
-      })
+    table.insert(venvs, {
+      name = Path:new(path):make_relative(base_path),
+      path = path,
+      source = source,
+    })
   end
   return venvs
 end
@@ -116,7 +111,7 @@ local get_pyenv_base_path = function()
   if pyenv_root == vim.NIL then
     return nil
   else
-    return Path:new(pyenv_root) .. "/versions"
+    return Path:new(pyenv_root) .. '/versions'
   end
 end
 
@@ -125,7 +120,7 @@ M.get_venvs = function(venvs_path)
   vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
   vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
-  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', {only_dirs = false}))
+  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
   return venvs
 end
 
@@ -141,6 +136,37 @@ M.pick_venv = function()
     end
     set_venv(choice)
   end)
+end
+
+M.set_venv = function(name)
+  local venvs = settings.get_venvs(settings.venvs_path)
+  local closest_match = best_match(venvs, name)
+  if not closest_match then
+    return
+  end
+  set_venv(closest_match)
+end
+
+M.auto_venv = function()
+  local loaded, project_nvim = pcall(require, 'project_nvim.project')
+  local venvs = settings.get_venvs(settings.venvs_path)
+  if not loaded then
+    print('Error: failed to load the project_nvim.project module')
+    return
+  end
+
+  local project_dir, _ = project_nvim.get_project_root()
+  if project_dir then -- project_nvim.get_project_root might not always return a project path
+    local project_venv_name = read_venv_name(project_dir)
+    if not project_venv_name then
+      return
+    end
+    local closest_match = best_match(venvs, project_venv_name)
+    if not closest_match then
+      return
+    end
+    set_venv(closest_match)
+  end
 end
 
 return M
