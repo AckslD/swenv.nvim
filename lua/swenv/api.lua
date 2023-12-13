@@ -170,15 +170,17 @@ M.auto_venv = function()
     return
   end
 
-  local project_venv_name = read_venv_name(project_dir)
-  if not project_venv_name then
-    return
+  if project_dir then  -- project_nvim.get_project_root might not always return a project path
+    local project_venv_name = read_venv_name(project_dir)
+    if not project_venv_name then
+      return
+    end
+    local closest_match = best_match(venvs, project_venv_name)
+    if not closest_match then
+      return
+    end
+    set_venv(closest_match)
   end
-  local closest_match = best_match(venvs, project_venv_name)
-  if not closest_match then
-    return
-  end
-  set_venv(closest_match)
 end
 
 return M
