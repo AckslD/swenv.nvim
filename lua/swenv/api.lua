@@ -169,17 +169,16 @@ M.auto_venv = function()
     print("Error: failed to load the project_nvim.project module")
     return
   end
-  if project_dir then
-    local project_venv_name = read_venv_name(project_dir)
-    if not project_venv_name then
-      return
-    end
-    local closest_match = best_match(venvs, project_venv_name)
-    if not closest_match then
-      return
-    end
-    set_venv(closest_match)
+
+  local project_venv_name = read_venv_name(project_dir)
+  if not project_venv_name then
+    return
   end
+  local closest_match = best_match(venvs, project_venv_name)
+  if not closest_match then
+    return
+  end
+  set_venv(closest_match)
 end
 
 return M
