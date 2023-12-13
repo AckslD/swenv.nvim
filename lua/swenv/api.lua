@@ -2,26 +2,26 @@ local M = {}
 
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
+local best_match = require("swenv.lib").best_match
+local read_venv_name = require("swenv.lib").read_venv_name
 
 local settings = require('swenv.config').settings
-local best_match = require('swenv.utils').best_match
-local read_venv_name = require('swenv.utils').read_venv_name
 
-local ORIGINAL_PATH = vim.fn.getenv("PATH")
+local ORIGINAL_PATH = vim.fn.getenv('PATH')
 
 local current_venv = nil
 
 local update_path = function(path)
-  vim.fn.setenv("PATH", path .. "/bin" .. ":" .. ORIGINAL_PATH)
+  vim.fn.setenv('PATH', path .. '/bin' .. ':' .. ORIGINAL_PATH)
 end
 
 local set_venv = function(venv)
-  if venv.source == "conda" then
-    vim.fn.setenv("CONDA_PREFIX", venv.path)
-    vim.fn.setenv("CONDA_DEFAULT_ENV", venv.name)
-    vim.fn.setenv("CONDA_PROMPT_MODIFIER", "(" .. venv.name .. ")")
+  if venv.source == 'conda' then
+    vim.fn.setenv('CONDA_PREFIX', venv.path)
+    vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
+    vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
   else
-    vim.fn.setenv("VIRTUAL_ENV", venv.path)
+    vim.fn.setenv('VIRTUAL_ENV', venv.path)
   end
 
   current_venv = venv
@@ -52,28 +52,23 @@ local has_high_priority_in_path = function(first, second)
 end
 
 M.init = function()
-  local success, Path = pcall(require, "plenary.path")
-  if not success then
-    vim.notify("Could not require plenary: " .. Path, vim.log.levels.WARN)
-    return
-  end
   local venv
 
-  local venv_env = vim.fn.getenv("VIRTUAL_ENV")
+  local venv_env = vim.fn.getenv('VIRTUAL_ENV')
   if venv_env ~= vim.NIL then
     venv = {
       name = Path:new(venv_env):make_relative(settings.venvs_path),
       path = venv_env,
-      source = "venv",
+      source = 'venv',
     }
   end
 
-  local conda_env = vim.fn.getenv("CONDA_DEFAULT_ENV")
+  local conda_env = vim.fn.getenv('CONDA_DEFAULT_ENV')
   if conda_env ~= vim.NIL and has_high_priority_in_path(conda_env, venv_env) then
     venv = {
       name = conda_env,
-      path = vim.fn.getenv("CONDA_PREFIX"),
-      source = "conda",
+      path = vim.fn.getenv('CONDA_PREFIX'),
+      source = 'conda'
     }
   end
 
@@ -138,9 +133,9 @@ end
 
 M.pick_venv = function()
   vim.ui.select(settings.get_venvs(settings.venvs_path), {
-    prompt = "Select python venv",
+    prompt = 'Select python venv',
     format_item = function(item)
-      return string.format("%s (%s) [%s]", item.name, item.path, item.source)
+      return string.format('%s (%s) [%s]', item.name, item.path, item.source)
     end,
   }, function(choice)
     if not choice then
