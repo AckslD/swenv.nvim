@@ -107,12 +107,13 @@ local get_conda_base_path = function()
 end
 
 local get_micromamba_base_path = function()
-  local micromamba_exe = vim.fn.getenv('MAMBA_EXE')
-  if micromamba_exe == vim.NIL then
+  local micromamba_env_path = Path:new(vim.fn.getenv('MAMBA_ROOT_PREFIX')) .. '/envs'
+  if micromamba_env_path == vim.NIL then
     return nil
   else
-    return Path:new(micromamba_exe):parent():parent() .. '/envs'
+    return micromamba_env_path
   end
+
 end
 
 local get_pyenv_base_path = function()
