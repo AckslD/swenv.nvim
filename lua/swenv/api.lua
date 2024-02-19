@@ -16,7 +16,7 @@ local update_path = function(path)
 end
 
 local set_venv = function(venv)
-  if venv.source == 'conda' then
+  if venv.source == 'conda' or venv.source == 'micromamba' then
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
     vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
@@ -106,6 +106,15 @@ local get_conda_base_path = function()
   end
 end
 
+local get_micromamba_base_path = function()
+  local micromamba_exe = vim.fn.getenv('MAMBA_EXE')
+  if micromamba_exe == vim.NIL then
+    return nil
+  else
+    return Path:new(micromamba_exe):parent():parent() .. '/envs'
+  end
+end
+
 local get_pyenv_base_path = function()
   local pyenv_root = vim.fn.getenv('PYENV_ROOT')
   if pyenv_root == vim.NIL then
@@ -119,6 +128,7 @@ M.get_venvs = function(venvs_path)
   local venvs = {}
   vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
   vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
+  vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
   return venvs
