@@ -113,7 +113,6 @@ local get_micromamba_base_path = function()
   else
     return micromamba_env_path
   end
-
 end
 
 local get_pyenv_base_path = function()
