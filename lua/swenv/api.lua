@@ -101,10 +101,10 @@ local get_pixi_base_path = function()
   local current_dir = vim.fn.getcwd()
   local pixi_root = Path:new(current_dir):joinpath('.pixi')
 
-  if not Path:new(pixi_root):exists() then
+  if not pixi_root:exists() then
     return nil
   else
-    return Path:new(pixi_root) .. '/envs'
+    return pixi_root .. '/envs'
   end
 end
 
