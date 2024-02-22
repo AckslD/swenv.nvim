@@ -98,7 +98,7 @@ local get_venvs_for = function(base_path, source, opts)
 end
 
 local get_pixi_base_path = function(base_path)
-  local pixi_root = base_path .. '/.pixi'
+  local pixi_root = Path:new(base_path):joinpath('.pixi')
 
   if vim.fn.isdirectory(pixi_root) == 0 then
     return nil
