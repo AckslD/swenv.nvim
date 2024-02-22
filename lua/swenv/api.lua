@@ -100,7 +100,9 @@ end
 local get_pixi_base_path = function(base_path)
   local pixi_root = base_path .. '/.pixi'
 
-  if pixi_root == vim.NIL then
+  if vim.fn.isdirectory(pixi_root) == 0 then
+    return nil
+  elseif vim.fn.isdirectory(Path:new(pixi_root) .. '/envs') == 0 then
     return nil
   else
     return Path:new(pixi_root) .. '/envs'
