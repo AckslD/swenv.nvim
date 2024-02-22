@@ -97,6 +97,17 @@ local get_venvs_for = function(base_path, source, opts)
   return venvs
 end
 
+local get_pixi_base_path = function()
+  local current_dir = vim.fn.getcwd()
+  local pixi_root = Path:new(current_dir):joinpath('.pixi')
+
+  if not pixi_root:exists() then
+    return nil
+  else
+    return pixi_root .. '/envs'
+  end
+end
+
 local get_conda_base_path = function()
   local conda_exe = vim.fn.getenv('CONDA_EXE')
   if conda_exe == vim.NIL then
@@ -127,6 +138,7 @@ end
 M.get_venvs = function(venvs_path)
   local venvs = {}
   vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
+  vim.list_extend(venvs, get_venvs_for(get_pixi_base_path(), 'pixi'))
   vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
   vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
