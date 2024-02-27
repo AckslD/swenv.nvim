@@ -94,6 +94,18 @@ local get_venvs_for = function(base_path, source, opts)
       source = source,
     })
   end
+  -- add base env in conda
+  if source == 'conda' then
+    local path = os.getenv("CONDA_EXE")
+    if path then
+      path = vim.fn.fnamemodify(path, ":p:h:h")
+      table.insert(venvs, 1, {
+        name = "base",
+        path = path,
+        source = "conda"
+      })
+    end
+  end
   return venvs
 end
 
