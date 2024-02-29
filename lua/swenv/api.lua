@@ -94,18 +94,6 @@ local get_venvs_for = function(base_path, source, opts)
       source = source,
     })
   end
-  -- add base env in conda
-  if source == 'conda' then
-    local path = os.getenv("CONDA_EXE")
-    if path then
-      path = vim.fn.fnamemodify(path, ":p:h:h")
-      table.insert(venvs, 1, {
-        name = "base",
-        path = path,
-        source = "conda"
-      })
-    end
-  end
   return venvs
 end
 
@@ -127,6 +115,19 @@ local get_conda_base_path = function()
   else
     return Path:new(conda_exe):parent():parent() .. '/envs'
   end
+end
+
+local get_conda_base_env = function ()
+  local venvs = {}
+  local path = os.getenv("CONDA_EXE")
+  if path then
+    table.insert(venvs, {
+      name = "base",
+      path = vim.fn.fnamemodify(path, ":p:h:h"),
+      source = "conda"
+    })
+  end
+  return venvs
 end
 
 local get_micromamba_base_path = function()
@@ -152,6 +153,7 @@ M.get_venvs = function(venvs_path)
   vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
   vim.list_extend(venvs, get_venvs_for(get_pixi_base_path(), 'pixi'))
   vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
+  vim.list_extend(venvs, get_conda_base_env())
   vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
