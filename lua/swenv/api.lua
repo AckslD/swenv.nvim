@@ -184,6 +184,7 @@ M.set_venv = function(name)
 end
 
 M.auto_venv = function()
+  
   local loaded, project_nvim = pcall(require, 'project_nvim.project')
   local venvs = settings.get_venvs(settings.venvs_path)
   if not loaded then
@@ -195,11 +196,14 @@ M.auto_venv = function()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
     local venv_data = get_project_venv_data(project_dir)
     if not venv_data then
+      print('no venv_data')
       return
     end
     if type(venv_data) == type({}) then
       vim.list_extend(venvs, venv_data)
       set_venv(venv_data)
+      print('set local venv ' .. venv_data.name)
+      return
     end
     local closest_match = best_match(venvs, venv_data)
     if not closest_match then
