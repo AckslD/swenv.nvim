@@ -90,12 +90,11 @@ local get_venvs_for = function(base_path, source, opts)
   end
   local paths = scan_dir(base_path, vim.tbl_extend('force', { depth = 1, only_dirs = true, silent = true }, opts or {}))
   for _, path in ipairs(paths) do
-    local venv = {
+    table.insert(venvs, {
       name = Path:new(path):make_relative(base_path),
       path = path,
       source = source,
-    }
-    table.insert(venvs, venv)
+    })
   end
   return venvs
 end
