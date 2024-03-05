@@ -3,7 +3,7 @@ local M = {}
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
 local best_match = require('swenv.match').best_match
-local get_project_venv_data = require('swenv.project').get_project_venv_data
+local read_venv_name = require('swenv.project').read_venv_name
 
 local settings = require('swenv.config').settings
 
@@ -215,17 +215,11 @@ M.auto_venv = function()
 
   local project_dir, _ = project_nvim.get_project_root()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
-    local venv_data = get_project_venv_data(project_dir)
-    if not venv_data then
-      return
+    local project_venv_name = read_venv_name(project_dir)
+    if not project_venv_name then
+       return
     end
-    if type(venv_data) == type({}) then
-      vim.list_extend(venvs, venv_data)
-      set_venv(venv_data)
-      return
-    end
-
-    local closest_match = best_match(venvs, venv_data)
+    local closest_match = best_match(venvs, project_venv_name)
     if not closest_match then
       return
     end
