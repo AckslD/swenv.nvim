@@ -20,8 +20,6 @@ local set_venv = function(venv)
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
     vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. venv.name .. ')')
-  elseif venv.source == 'poetry' then
-    vim.fn.setenv('VIRTUAL_ENV', venv.path)
   else
     vim.fn.setenv('VIRTUAL_ENV', venv.path)
   end
@@ -216,7 +214,7 @@ M.auto_venv = function()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
     local project_venv_name = read_venv_name(project_dir)
     if not project_venv_name then
-       return
+      return
     end
     local closest_match = best_match(venvs, project_venv_name)
     if not closest_match then
