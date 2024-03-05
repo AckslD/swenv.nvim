@@ -196,7 +196,6 @@ M.auto_venv = function()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
     local venv_data = get_project_venv_data(project_dir)
     if not venv_data then
-      print('no venv_data')
       return
     end
     if type(venv_data) == type({}) then
