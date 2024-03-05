@@ -152,7 +152,7 @@ local get_poetry_venvs_base_path = function()
   
   local poetry_root_prefix = p_file:read('*all')
   poetry_root_prefix = string.gsub(poetry_root_prefix, "%s+", "")
-  if poetry_root_prefix == aiogram'' then
+  if poetry_root_prefix == '' then
     return nil
   else
     local base_path = Path:new(poetry_root_prefix) .. ''
