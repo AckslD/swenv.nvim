@@ -27,6 +27,26 @@ require('swenv.api').pick_venv()
 to pick an environment. Uses `vim.ui.select` so a tip is to use eg
 [dressing.nvim](https://github.com/stevearc/dressing.nvim).
 
+### Supported envs
+
+Swenv supports various env types:
+Conda, pixi, micromamba, pyenv... For some envs types, such as poetry, you can specify env path: 
+
+```lua
+require('swenv').setup({
+  venvs_path = vim.fn.expand('~/.cache/pypoetry/virtualenvs'),
+})
+```
+
+If you havent some envs group, you can disable they, to save startup time:
+
+```lua
+require('swenv').setup({
+  ignore_envs_groups = {'conda', 'pixi', 'micromamba', 'pyenv'}
+})
+```
+
+
 ### Get Environment
 
 To show the current venv in for example a status-line you can call

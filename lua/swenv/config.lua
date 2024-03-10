@@ -10,6 +10,7 @@ M.settings = {
   -- Path passed to `get_venvs`.
   venvs_path = vim.fn.expand('~/venvs'),
   -- Something to do after setting an environment
+  ignore_envs_groups = {},
   post_set_venv = nil,
 }
 
