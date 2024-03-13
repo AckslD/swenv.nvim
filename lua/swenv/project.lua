@@ -5,7 +5,8 @@ local function isdir(dir_path)
   return vim.fn.isdirectory(dir_path) ~= 0
 end
 
-local function get_local_env(venv_path)
+-- get_local_venv from ./.venv dir
+M.get_local_venv = function(venv_path)
   local venv_cfg = io.open(venv_path .. '/pyvenv.cfg', 'r')
   if not venv_cfg then
     return nil
@@ -24,16 +25,13 @@ local function get_local_env(venv_path)
 end
 
 -- Get the name from a `.venv` file in the project root directory.
-M.get_project_venv_data = function(project_dir)
+M.get_project_venv = function(project_dir)
   local venv_path = project_dir .. '/.venv'
   local file = io.open(venv_path, 'r') -- r read mode
   if isdir(venv_path) then
-    return get_local_env(venv_path)
+    return './.venv/' -- sign of local venv
   end
   if not file then
-    if isdir(venv_path) then
-      return get_local_env(venv_path)
-    end
     return nil
   end
   local content = file:read('*a') -- *a or *all reads the whole file

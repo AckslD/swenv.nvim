@@ -3,7 +3,8 @@ local M = {}
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
 local best_match = require('swenv.match').best_match
-local get_project_venv_data = require('swenv.project').get_project_venv_data
+local get_project_venv = require('swenv.project').get_project_venv
+local get_local_venv = require('swenv.project').get_local_venv
 
 local settings = require('swenv.config').settings
 
@@ -184,7 +185,6 @@ M.set_venv = function(name)
 end
 
 M.auto_venv = function()
-  
   local loaded, project_nvim = pcall(require, 'project_nvim.project')
   local venvs = settings.get_venvs(settings.venvs_path)
   if not loaded then
@@ -194,20 +194,23 @@ M.auto_venv = function()
 
   local project_dir, _ = project_nvim.get_project_root()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
-    local venv_data = get_project_venv_data(project_dir)
-    if not venv_data then
+    local venv_name = get_project_venv(project_dir)
+    if not venv_name then
       return
     end
-    if type(venv_data) == type({}) then
-      vim.list_extend(venvs, venv_data)
-      set_venv(venv_data)
+    if venv_name == './.venv/' then
+      local venv = get_local_venv(project_dir .. venv_name)
+      if venv ~= nil then
+        return
+      end
+      vim.list_extend(venvs, venv)
+      set_venv(venv)
       return
     end
-    local closest_match = best_match(venvs, venv_data)
-    if not closest_match then
-      return
+    local closest_match = best_match(venvs, venv)
+    if closest_match then
+      set_venv(closest_match)
     end
-    set_venv(closest_match)
   end
 end
 
