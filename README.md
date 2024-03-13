@@ -42,7 +42,7 @@ If you havent some envs group, you can disable they, to save startup time:
 
 ```lua
 require('swenv').setup({
-  ignore_envs_groups = {'conda', 'pixi', 'micromamba', 'pyenv'}
+  ignore_envs = {'conda', 'pixi', 'micromamba', 'pyenv'}
 })
 ```
 

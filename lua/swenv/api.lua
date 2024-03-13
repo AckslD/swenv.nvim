@@ -151,30 +151,40 @@ end
 
 local to_set = function(some_list)
   local set = {}
-  for _, key in ipair(some_list) do
+  for _, key in ipairs(some_list) do
     set[key] = true
   end
   return set
 end
 
+local venvs_getters = {
+  conda = function()
+    local venvs = {}
+    vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
+    vim.list_extend(venvs, get_conda_base_env())
+    return venvs
+  end,
+  pixi = function()
+    return get_venvs_for(get_pixi_base_path(), 'pixi')
+  end,
+  micromamba = function()
+    return get_venvs_for(get_micromamba_base_path(), 'micromamba')
+  end,
+  pyenv = function()
+    local venvs = {}
+    vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
+    vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
+    return venvs
+  end,
+}
+
 M.get_venvs = function(venvs_path)
   local venvs = {}
   vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
-
-  local ignore_envs = to_set(settings.ignore_envs_groups)
-  if ignore_envs and not ignore_envs['conda'] then
-    vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
-    vim.list_extend(venvs, get_conda_base_env())
-  end
-  if ignore_envs and not ignore_envs['pixi'] then
-    vim.list_extend(venvs, get_venvs_for(get_pixi_base_path(), 'pixi'))
-  end
-  if ignore_envs and not ignore_envs['micromamba'] then
-    vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
-  end
-  if ignore_envs and not ignore_envs['pyenv'] then
-    vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
-    vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
+  for name, getter in pairs(venvs_getters) do
+    if not settings.ignore_envs[name] then
+      vim.list_extend(venvs, getter())
+    end
   end
   return venvs
 end
