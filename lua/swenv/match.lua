@@ -21,13 +21,13 @@ end
 
 -- Function to find the best match based on Levenshtein distance
 M.best_match = function(items, query)
-  local min_distance = math.huge -- Initialize minimum distance as infinity
-  local match = nil -- Initialize match as nil to handle case if no match found
-  for _, item in ipairs(items) do -- Iterate over items
+  local min_distance = math.huge           -- Initialize minimum distance as infinity
+  local match = nil                        -- Initialize match as nil to handle case if no match found
+  for _, item in ipairs(items) do          -- Iterate over items
     local distance = lev(query, item.name) -- Compute Levenshtein distance to the query
-    if distance < min_distance then -- If this item is closer to query...
-      min_distance = distance -- Update minimum distance
-      match = item -- Update the match
+    if distance < min_distance then        -- If this item is closer to query...
+      min_distance = distance              -- Update minimum distance
+      match = item                         -- Update the match
     end
   end
   return match -- Return the best match
