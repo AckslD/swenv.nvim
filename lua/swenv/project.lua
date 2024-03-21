@@ -29,7 +29,7 @@ M.get_project_venv = function(project_dir)
   local venv_path = project_dir .. '/.venv'
   local file = io.open(venv_path, 'r') -- r read mode
   if isdir(venv_path) then
-    return './.venv/' -- sign of local venv
+    return '/.venv/' -- sign of local venv
   end
   if not file then
     return nil

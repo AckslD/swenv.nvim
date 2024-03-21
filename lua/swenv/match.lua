@@ -21,6 +21,17 @@ end
 
 -- Function to find the best match based on Levenshtein distance
 M.best_match = function(items, query)
+  -- filter by contains query-string in elements 
+  local filtered_items = {}
+  for _, item in ipairs(items) do
+    if string.find(item.name, query) then
+      table.insert(filtered_items, item)
+    end
+  end
+  if #filtered_items > 0 then
+    items = filtered_items
+  end
+
   local min_distance = math.huge -- Initialize minimum distance as infinity
   local match = nil -- Initialize match as nil to handle case if no match found
   for _, item in ipairs(items) do -- Iterate over items

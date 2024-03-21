@@ -48,7 +48,16 @@ local has_high_priority_in_path = function(first, second)
   if second == nil or second == vim.NIL then
     return true
   end
+  local prior_first = string.find(ORIGINAL_PATH, first)
+  local prior_second = string.find(ORIGINAL_PATH, second)
 
+  if prior_first == nil or prior_first == vim.NIL then
+    return false
+  end
+
+  if prior_second == nil or prior_second == vim.NIL then
+    return true
+  end
   return string.find(ORIGINAL_PATH, first) < string.find(ORIGINAL_PATH, second)
 end
 
@@ -72,7 +81,6 @@ M.init = function()
       source = 'conda',
     }
   end
-
   if venv then
     current_venv = venv
   end
@@ -196,18 +204,18 @@ M.auto_venv = function()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
     local venv_name = get_project_venv(project_dir)
     if not venv_name then
+
       return
     end
-    if venv_name == './.venv/' then
+    if venv_name == '/.venv/' then
       local venv = get_local_venv(project_dir .. venv_name)
-      if venv ~= nil then
-        return
+      if venv then
+        table.insert(venvs, venv)
+        set_venv(venv)
       end
-      vim.list_extend(venvs, venv)
-      set_venv(venv)
       return
     end
-    local closest_match = best_match(venvs, venv)
+    local closest_match = best_match(venvs, venv_name)
     if closest_match then
       set_venv(closest_match)
     end
