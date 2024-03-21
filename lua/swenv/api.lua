@@ -3,7 +3,8 @@ local M = {}
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
 local best_match = require('swenv.match').best_match
-local read_venv_name = require('swenv.project').read_venv_name
+local get_project_venv = require('swenv.project').get_project_venv
+local get_local_venv = require('swenv.project').get_local_venv
 
 local settings = require('swenv.config').settings
 
@@ -47,7 +48,16 @@ local has_high_priority_in_path = function(first, second)
   if second == nil or second == vim.NIL then
     return true
   end
+  local prior_first = string.find(ORIGINAL_PATH, first)
+  local prior_second = string.find(ORIGINAL_PATH, second)
 
+  if prior_first == nil or prior_first == vim.NIL then
+    return false
+  end
+
+  if prior_second == nil or prior_second == vim.NIL then
+    return true
+  end
   return string.find(ORIGINAL_PATH, first) < string.find(ORIGINAL_PATH, second)
 end
 
@@ -71,7 +81,6 @@ M.init = function()
       source = 'conda',
     }
   end
-
   if venv then
     current_venv = venv
   end
@@ -193,15 +202,23 @@ M.auto_venv = function()
 
   local project_dir, _ = project_nvim.get_project_root()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
-    local project_venv_name = read_venv_name(project_dir)
-    if not project_venv_name then
+    local venv_name = get_project_venv(project_dir)
+    if not venv_name then
+
       return
     end
-    local closest_match = best_match(venvs, project_venv_name)
-    if not closest_match then
+    if venv_name == '/.venv/' then
+      local venv = get_local_venv(project_dir .. venv_name)
+      if venv then
+        table.insert(venvs, venv)
+        set_venv(venv)
+      end
       return
     end
-    set_venv(closest_match)
+    local closest_match = best_match(venvs, venv_name)
+    if closest_match then
+      set_venv(closest_match)
+    end
   end
 end
 
