@@ -7,6 +7,9 @@ M.read_venv_name = function(project_dir)
     return nil
   end
   local content = file:read('*a') -- *a or *all reads the whole file
+  if content == nil then
+    return nil
+  end
   file:close()
   return content:match('^%s*(.-)%s*$') -- Trim whitespace
 end
