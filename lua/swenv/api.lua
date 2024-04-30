@@ -4,6 +4,7 @@ local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
 local best_match = require('swenv.match').best_match
 local read_venv_name = require('swenv.project').read_venv_name
+local get_local_venv_path = require('swenv.project').get_local_venv_path
 
 local settings = require('swenv.config').settings
 
@@ -117,14 +118,14 @@ local get_conda_base_path = function()
   end
 end
 
-local get_conda_base_env = function ()
+local get_conda_base_env = function()
   local venvs = {}
-  local path = os.getenv("CONDA_EXE")
+  local path = os.getenv('CONDA_EXE')
   if path then
     table.insert(venvs, {
-      name = "base",
-      path = vim.fn.fnamemodify(path, ":p:h:h"),
-      source = "conda"
+      name = 'base',
+      path = vim.fn.fnamemodify(path, ':p:h:h'),
+      source = 'conda',
     })
   end
   return venvs
@@ -184,6 +185,8 @@ M.set_venv = function(name)
 end
 
 M.auto_venv = function()
+  -- the function tries to activate in-project venvs, if present. Otherwise it tries to activate a venv in venvs folder
+  -- which best matches the project name.
   local loaded, project_nvim = pcall(require, 'project_nvim.project')
   local venvs = settings.get_venvs(settings.venvs_path)
   if not loaded then
@@ -197,11 +200,16 @@ M.auto_venv = function()
     if not project_venv_name then
       return
     end
-    local closest_match = best_match(venvs, project_venv_name)
-    if not closest_match then
-      return
+    -- in-project venv activation
+    local venv = { path = get_local_venv_path(project_dir), name = project_venv_name }
+
+    -- venvs folder actication
+    if not venv.path then
+      venv = best_match(venvs, project_venv_name)
     end
-    set_venv(closest_match)
+    if venv then
+      set_venv(venv)
+    end
   end
 end
 
