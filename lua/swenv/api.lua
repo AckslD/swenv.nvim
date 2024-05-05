@@ -3,7 +3,9 @@ local M = {}
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
 local best_match = require('swenv.match').best_match
-local read_venv_name = require('swenv.project').read_venv_name
+local read_venv_name_in_project = require('swenv.project').read_venv_name_in_project
+local read_venv_name_common_dir = require('swenv.project').read_venv_name_common_dir
+local get_local_venv_path = require('swenv.project').get_local_venv_path
 
 local settings = require('swenv.config').settings
 
@@ -117,14 +119,14 @@ local get_conda_base_path = function()
   end
 end
 
-local get_conda_base_env = function ()
+local get_conda_base_env = function()
   local venvs = {}
-  local path = os.getenv("CONDA_EXE")
+  local path = os.getenv('CONDA_EXE')
   if path then
     table.insert(venvs, {
-      name = "base",
-      path = vim.fn.fnamemodify(path, ":p:h:h"),
-      source = "conda"
+      name = 'base',
+      path = vim.fn.fnamemodify(path, ':p:h:h'),
+      source = 'conda',
     })
   end
   return venvs
@@ -184,6 +186,8 @@ M.set_venv = function(name)
 end
 
 M.auto_venv = function()
+  -- the function tries to activate in-project venvs, if present. Otherwise it tries to activate a venv in venvs folder
+  -- which best matches the project name.
   local loaded, project_nvim = pcall(require, 'project_nvim.project')
   local venvs = settings.get_venvs(settings.venvs_path)
   if not loaded then
@@ -193,15 +197,20 @@ M.auto_venv = function()
 
   local project_dir, _ = project_nvim.get_project_root()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
-    local project_venv_name = read_venv_name(project_dir)
-    if not project_venv_name then
+    local venv_name = read_venv_name_in_project(project_dir)
+    if venv_name then
+      local venv = { path = get_local_venv_path(project_dir), name = venv_name }
+      set_venv(venv)
       return
     end
-    local closest_match = best_match(venvs, project_venv_name)
-    if not closest_match then
-      return
+    venv_name = read_venv_name_common_dir(project_dir)
+    if venv_name then
+      local venv = best_match(venvs, venv_name)
+      if venv then
+        set_venv(venv)
+        return
+      end
     end
-    set_venv(closest_match)
   end
 end
 
