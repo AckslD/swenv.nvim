@@ -3,7 +3,8 @@ local M = {}
 local Path = require('plenary.path')
 local scan_dir = require('plenary.scandir').scan_dir
 local best_match = require('swenv.match').best_match
-local read_venv_name = require('swenv.project').read_venv_name
+local read_venv_name_in_project = require('swenv.project').read_venv_name_in_project
+local read_venv_name_common_dir = require('swenv.project').read_venv_name_common_dir
 local get_local_venv_path = require('swenv.project').get_local_venv_path
 
 local settings = require('swenv.config').settings
@@ -196,19 +197,19 @@ M.auto_venv = function()
 
   local project_dir, _ = project_nvim.get_project_root()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
-    local project_venv_name = read_venv_name(project_dir)
-    if not project_venv_name then
+    local venv_name = read_venv_name_in_project(project_dir)
+    if venv_name then
+      local venv = { path = get_local_venv_path(project_dir), name = venv_name }
+      set_venv(venv)
       return
     end
-    -- in-project venv activation
-    local venv = { path = get_local_venv_path(project_dir), name = project_venv_name }
-
-    -- venvs folder actication
-    if not venv.path then
-      venv = best_match(venvs, project_venv_name)
-    end
-    if venv then
-      set_venv(venv)
+    venv_name = read_venv_name_common_dir(project_dir)
+    if venv_name then
+      local venv = best_match(venvs, venv_name)
+      if venv then
+        set_venv(venv)
+        return
+      end
     end
   end
 end
