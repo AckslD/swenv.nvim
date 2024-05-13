@@ -14,7 +14,12 @@ local ORIGINAL_PATH = vim.fn.getenv('PATH')
 local current_venv = nil
 
 local update_path = function(path)
-  vim.fn.setenv('PATH', path .. '/Scripts' .. ';' .. ORIGINAL_PATH)
+  local os = string.lower(vim.loop.os_uname().sysname)
+  if string.find(os, 'windows') then
+    vim.fn.setenv('PATH', path .. '/Scripts' .. ';' .. ORIGINAL_PATH)
+  else
+    vim.fn.setenv('PATH', path .. '/bin' .. ':' .. ORIGINAL_PATH)
+  end
 end
 
 local set_venv = function(venv)
