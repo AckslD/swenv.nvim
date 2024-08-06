@@ -6,7 +6,8 @@ local venv_dir = settings.auto_create_venv_dir
 --- Set venv via swenv. Only set venv if its different than current.
 --- local venv_dir = settings.auto_create_venv_dir
 ---@param venv_path string full path to venv directory
-local function swenv_set_venv(venv_path)
+---@param venv_name string name of the venv to set
+local function swenv_set_venv(venv_path, venv_name)
   if venv_path then
     local swenv_api = require('swenv.api')
     local current_venv_name = nil
@@ -15,7 +16,7 @@ local function swenv_set_venv(venv_path)
       current_venv_name = current_venv.name
     end
     if venv_path ~= current_venv_name then
-      swenv_api.set_venv(venv_path)
+      swenv_api.set_venv_path({ path = venv_path, name = current_venv_name })
     end
   end
 end
@@ -61,7 +62,8 @@ local function pdm_sync(pdm_lock_path)
           vim.notify('swenv.nvim: ' .. vim.inspect(j._stderr_results), vim.log.levels.ERROR)
         else
           local venv_path = dir_name .. '/' .. venv_dir
-          swenv_set_venv(venv_path)
+          local venv_name = vim.fs.basename(dir_name)
+          swenv_set_venv(venv_path, venv_name)
           vim.notify('swenv.nvim: set venv: ' .. venv_path, vim.log.levels.INFO)
         end
       end)
@@ -106,7 +108,9 @@ local function pip_install_with_venv(requirements_path)
                 if k.code ~= 0 then
                   vim.notify('swenv.nvim: ' .. vim.inspect(k._stderr_results), vim.log.levels.ERROR)
                 else
-                  swenv_set_venv(venv_path)
+
+                  local venv_name = vim.fs.basename(dir_name)
+                  swenv_set_venv(venv_path, venv_name)
                   vim.notify('Set venv: ' .. venv_path, vim.log.levels.INFO)
                 end
               end)
@@ -126,7 +130,8 @@ M.auto_create_set_python_venv = function()
       path = venv_dir,
       callback = function(path)
         -- initial set, still want to do dependency install from others if available
-        swenv_set_venv(path)
+        local venv_name = vim.fs.basename(vim.fs.dirname(path))
+        swenv_set_venv(path, venv_name)
       end,
     },
     {

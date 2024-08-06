@@ -18,7 +18,7 @@ local update_path = function(path)
   vim.fn.setenv('PATH', path .. '/bin' .. ':' .. ORIGINAL_PATH)
 end
 
-local set_venv = function(venv)
+M.set_venv_path = function(venv)
   if venv.source == 'conda' or venv.source == 'micromamba' then
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
@@ -173,7 +173,7 @@ M.pick_venv = function()
     if not choice then
       return
     end
-    set_venv(choice)
+    M.set_venv_path(choice)
   end)
 end
 
@@ -183,7 +183,7 @@ M.set_venv = function(name)
   if not closest_match then
     return
   end
-  set_venv(closest_match)
+  M.set_venv_path(closest_match)
 end
 
 ---
@@ -195,14 +195,14 @@ local auto_venv_project_nvim = function(project_nvim, venvs)
     local venv_name = read_venv_name_in_project(project_dir)
     if venv_name then
       local venv = { path = get_local_venv_path(project_dir), name = venv_name }
-      set_venv(venv)
+      M.set_venv_path(venv)
       return
     end
     venv_name = read_venv_name_common_dir(project_dir)
     if venv_name then
       local venv = best_match(venvs, venv_name)
       if venv then
-        set_venv(venv)
+        M.set_venv_path(venv)
         return
       end
     end
