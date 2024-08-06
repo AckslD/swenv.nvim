@@ -16,7 +16,7 @@ local function swenv_set_venv(venv_path, venv_name)
       current_venv_name = current_venv.name
     end
     if venv_path ~= current_venv_name then
-      swenv_api.set_venv_path({ path = venv_path, name = current_venv_name })
+      swenv_api.set_venv_path({ path = venv_path, name = venv_name })
     end
   end
 end
