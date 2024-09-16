@@ -123,6 +123,8 @@ local function pip_install_with_venv(requirements_path)
 end
 
 --- Automatically create venv directory and use multiple method to auto install dependencies
+--- Use module level variable Auto_set_python_venv_parent_dir to keep track of the last venv dir, so 
+---   We don't do the creation process again when you are in the same project.
 M.auto_create_set_python_venv = function()
   local stop = false
   local check_paths = {
@@ -138,7 +140,7 @@ M.auto_create_set_python_venv = function()
       path = 'pdm.lock',
       callback = function(path)
         pdm_sync(path)
-        vim.g._auto_set_python_venv_parent_dir = vim.fs.dirname(path)
+        Auto_set_python_venv_parent_dir = vim.fs.dirname(path)
         stop = true
       end,
     },
@@ -146,7 +148,7 @@ M.auto_create_set_python_venv = function()
       path = 'requirements.txt',
       callback = function(path)
         pip_install_with_venv(path)
-        vim.g._auto_set_python_venv_parent_dir = vim.fs.dirname(path)
+        Auto_set_python_venv_parent_dir = vim.fs.dirname(path)
         stop = true
       end,
     },
@@ -154,7 +156,7 @@ M.auto_create_set_python_venv = function()
       path = 'dev-requirements.txt',
       callback = function(path)
         pip_install_with_venv(path)
-        vim.g._auto_set_python_venv_parent_dir = vim.fs.dirname(path)
+        Auto_set_python_venv_parent_dir = vim.fs.dirname(path)
         stop = true
       end,
     },
@@ -162,7 +164,7 @@ M.auto_create_set_python_venv = function()
       path = 'pyproject.toml',
       callback = function(path)
         pip_install_with_venv(path)
-        vim.g._auto_set_python_venv_parent_dir = vim.fs.dirname(path)
+        Auto_set_python_venv_parent_dir = vim.fs.dirname(path)
         stop = true
       end,
     },
@@ -177,7 +179,7 @@ M.auto_create_set_python_venv = function()
     end
     found_path = search_up(search_path)
     if found_path ~= nil then
-      local last_parent_dir = vim.g._auto_set_python_venv_parent_dir
+      local last_parent_dir = Auto_set_python_venv_parent_dir
       local new_parent_dir = vim.fs.dirname(found_path)
       if last_parent_dir ~= new_parent_dir then
         callback(found_path)
