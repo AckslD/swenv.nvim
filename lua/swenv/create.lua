@@ -96,7 +96,7 @@ local function pip_install_with_venv(requirements_path)
         else
           local pip_path = venv_path .. '/' .. 'bin/pip'
           local install_args = { 'install', '-r', requirements_path }
-          if requirements_path == 'pyproject.toml' then
+          if string.find(requirements_path, 'pyproject.toml$') then
             install_args = { 'install', '.' }
           end
           Job:new({
@@ -108,7 +108,6 @@ local function pip_install_with_venv(requirements_path)
                 if k.code ~= 0 then
                   vim.notify('swenv.nvim: ' .. vim.inspect(k._stderr_results), vim.log.levels.ERROR)
                 else
-
                   local venv_name = vim.fs.basename(dir_name)
                   swenv_set_venv(venv_path, venv_name)
                   vim.notify('Set venv: ' .. venv_path, vim.log.levels.INFO)
@@ -123,7 +122,7 @@ local function pip_install_with_venv(requirements_path)
 end
 
 --- Automatically create venv directory and use multiple method to auto install dependencies
---- Use module level variable Auto_set_python_venv_parent_dir to keep track of the last venv dir, so 
+--- Use module level variable Auto_set_python_venv_parent_dir to keep track of the last venv dir, so
 ---   We don't do the creation process again when you are in the same project.
 M.auto_create_set_python_venv = function()
   local stop = false
