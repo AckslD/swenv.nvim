@@ -7,6 +7,7 @@ Table of Contents                                    *swenv-table-of-contents*
   - Installation                               |swenv-swenv.nvim-installation|
   - Usage                                             |swenv-swenv.nvim-usage|
   - Configuration                             |swenv-swenv.nvim-configuration|
+2. Links                                                         |swenv-links|
 
 ==============================================================================
 1. swenv.nvim                                               *swenv-swenv.nvim*
