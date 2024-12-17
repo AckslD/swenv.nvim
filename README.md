@@ -12,6 +12,7 @@ For example using [`packer`](https://github.com/wbthomason/packer.nvim):
 ```lua
 use 'AckslD/swenv.nvim'
 ```
+
 Requires `plenary`.
 
 ## Usage
@@ -75,6 +76,14 @@ vim.api.nvim_create_autocmd("FileType", {
         require('swenv.api').auto_venv()
     end
 })
+```
+
+#### Reset Environment
+
+To reset the virtual environment and restore the original Python version, you can call:
+
+```lua
+require('swenv.api').reset_venv()
 ```
 
 ## Configuration
