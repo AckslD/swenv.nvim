@@ -10,16 +10,20 @@ local get_local_venv_path = require('swenv.project').get_local_venv_path
 local settings = require('swenv.config').settings
 
 local ORIGINAL_PATH = vim.fn.getenv('PATH')
-
+local IS_WINDOWS = vim.uv.os_uname() == 'Windows_NT'
 local current_venv = nil
 
 local update_path = function(path)
-  local os = string.lower(vim.loop.os_uname().sysname)
-  if string.find(os, 'windows') then
-    vim.fn.setenv('PATH', path .. '/Scripts' .. ';' .. ORIGINAL_PATH)
+  local sep
+  local dir
+  if IS_WINDOWS then
+    sep = ';'
+    dir = 'Scripts'
   else
-    vim.fn.setenv('PATH', path .. '/bin' .. ':' .. ORIGINAL_PATH)
+    sep = ':'
+    dir = 'bin'
   end
+  vim.fn.setenv('PATH', Path:new(path) / dir .. sep .. ORIGINAL_PATH)
 end
 
 local set_venv = function(venv)
@@ -106,12 +110,12 @@ end
 
 local get_pixi_base_path = function()
   local current_dir = vim.fn.getcwd()
-  local pixi_root = Path:new(current_dir):joinpath('.pixi')
+  local pixi_root = Path:new(current_dir) / '.pixi'
 
   if not pixi_root:exists() then
     return nil
   else
-    return pixi_root .. '/envs'
+    return pixi_root / 'envs'
   end
 end
 
@@ -120,7 +124,7 @@ local get_conda_base_path = function()
   if conda_exe == vim.NIL then
     return nil
   else
-    return Path:new(conda_exe):parent():parent() .. '/envs'
+    return Path:new(conda_exe):parent():parent() / 'envs'
   end
 end
 
@@ -142,7 +146,7 @@ local get_micromamba_base_path = function()
   if micromamba_root_prefix == vim.NIL then
     return nil
   else
-    return Path:new(micromamba_root_prefix) .. '/envs'
+    return Path:new(micromamba_root_prefix) / 'envs'
   end
 end
 
@@ -151,7 +155,7 @@ local get_pyenv_base_path = function()
   if pyenv_root == vim.NIL then
     return nil
   else
-    return Path:new(pyenv_root) .. '/versions'
+    return Path:new(pyenv_root) / 'versions'
   end
 end
 
