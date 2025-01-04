@@ -10,7 +10,7 @@ local get_local_venv_path = require('swenv.project').get_local_venv_path
 local settings = require('swenv.config').settings
 
 local ORIGINAL_PATH = vim.fn.getenv('PATH')
-local IS_WINDOWS = vim.uv.os_uname() == 'Windows_NT'
+local IS_WINDOWS = vim.uv.os_uname().sysname == 'Windows_NT'
 local current_venv = nil
 
 local update_path = function(path)
