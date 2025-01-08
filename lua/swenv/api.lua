@@ -10,14 +10,22 @@ local get_local_venv_path = require("swenv.project").get_local_venv_path
 local settings = require("swenv.config").settings
 
 local ORIGINAL_PATH = vim.fn.getenv("PATH")
+local IS_WINDOWS = vim.uv.os_uname().sysname == "Windows_NT"
 local ORIGINAL_VIRTUAL_ENV = vim.fn.getenv("VIRTUAL_ENV")
 local ORIGINAL_CONDA_PREFIX = vim.fn.getenv("CONDA_PREFIX")
 local ORIGINAL_CONDA_DEFAULT_ENV = vim.fn.getenv("CONDA_DEFAULT_ENV")
 
-local current_venv = nil
-
 local update_path = function(path)
-  vim.fn.setenv("PATH", path .. "/bin" .. ":" .. ORIGINAL_PATH)
+  local sep
+  local dir
+  if IS_WINDOWS then
+    sep = ";"
+    dir = "Scripts"
+  else
+    sep = ":"
+    dir = "bin"
+  end
+  vim.fn.setenv("PATH", Path:new(path) / dir .. sep .. ORIGINAL_PATH)
 end
 
 local set_venv = function(venv)
