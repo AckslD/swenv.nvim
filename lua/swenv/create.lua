@@ -171,8 +171,8 @@ M.auto_create_set_python_venv = function()
 
   for _, val in ipairs(check_paths) do
     local found_path = nil
-    local search_path = val['path']
-    local callback = val['callback']
+    local search_path = val.path
+    local callback = val.callback
     if stop then
       return
     end
