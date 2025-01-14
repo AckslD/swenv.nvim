@@ -1,5 +1,5 @@
 syntax = "Lua51"
-quote_style = "AutoPreferDouble"
+quote_style = "AutoPreferSingle"
 indent_width = 2
 indent_type = "Spaces"
 line_endings = "Unix"
