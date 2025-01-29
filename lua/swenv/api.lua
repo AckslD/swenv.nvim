@@ -120,7 +120,7 @@ local get_pixi_base_path = function()
   if not pixi_root:exists() then
     return nil
   else
-    return pixi_root .. '/envs'
+    return pixi_root / 'envs'
   end
 end
 
