@@ -12,6 +12,14 @@ M.settings = {
   -- Something to do after setting an environment
   ignore_envs = {},
   post_set_venv = nil,
+  -- Attempt detect and auto create venv directories using
+  -- pdm
+  -- requirements.txt
+  -- dev-requirements.txt
+  -- pyproject.toml
+  auto_create_venv = false,
+  -- directory to create for venv auto creation
+  auto_create_venv_dir = '.venv',
 }
 
 return M
