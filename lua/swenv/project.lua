@@ -34,7 +34,6 @@ M.read_venv_name_common_dir = function(project_dir)
   if not venv_file then
     return nil
   end
-
   local content = venv_file:read('*a') -- *a or *all reads the whole file
   if not content then
     return nil

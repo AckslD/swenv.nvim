@@ -93,13 +93,14 @@ M.get_current_venv = function()
   return current_venv
 end
 
+
 local get_venvs_for = function(base_path, source, opts)
   local venvs = {}
   if base_path == nil then
     return venvs
   end
   local paths = scan_dir(base_path, vim.tbl_extend('force', { depth = 1, only_dirs = true, silent = true }, opts or {}))
-  for _, path in ipairs(paths) do
+  for _, path in pairs(paths) do
     table.insert(venvs, {
       name = Path:new(path):make_relative(base_path),
       path = path,
@@ -160,15 +161,43 @@ local get_pyenv_base_path = function()
   end
 end
 
+local to_set = function(some_list)
+  local set = {}
+  for _, key in ipairs(some_list) do
+    set[key] = true
+  end
+  return set
+end
+
+local venvs_getters = {
+  conda = function()
+    local venvs = {}
+    vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
+    vim.list_extend(venvs, get_conda_base_env())
+    return venvs
+  end,
+  pixi = function()
+    return get_venvs_for(get_pixi_base_path(), 'pixi')
+  end,
+  micromamba = function()
+    return get_venvs_for(get_micromamba_base_path(), 'micromamba')
+  end,
+  pyenv = function()
+    local venvs = {}
+    vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
+    vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
+    return venvs
+  end,
+}
+
 M.get_venvs = function(venvs_path)
   local venvs = {}
   vim.list_extend(venvs, get_venvs_for(venvs_path, 'venv'))
-  vim.list_extend(venvs, get_venvs_for(get_pixi_base_path(), 'pixi'))
-  vim.list_extend(venvs, get_venvs_for(get_conda_base_path(), 'conda'))
-  vim.list_extend(venvs, get_conda_base_env())
-  vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
-  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
-  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
+  for name, getter in pairs(venvs_getters) do
+    if not settings.ignore_envs[name] then
+      vim.list_extend(venvs, getter())
+    end
+  end
   return venvs
 end
 
