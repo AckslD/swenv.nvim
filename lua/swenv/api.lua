@@ -213,10 +213,8 @@ M.reset_venv = function()
 
   if ORIGINAL_CONDA_DEFAULT_ENV ~= vim.NIL then
     vim.fn.setenv('CONDA_DEFAULT_ENV', ORIGINAL_CONDA_DEFAULT_ENV)
-    vim.fn.setenv('CONDA_PROMPT_MODIFIER', '(' .. ORIGINAL_CONDA_DEFAULT_ENV .. ')')
   else
     vim.fn.setenv('CONDA_DEFAULT_ENV', nil)
-    vim.fn.setenv('CONDA_PROMPT_MODIFIER', nil)
   end
 
   -- Reset current_venv
