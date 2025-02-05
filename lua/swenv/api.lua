@@ -129,7 +129,7 @@ local get_conda_base_path = function()
   if conda_exe == vim.NIL then
     return nil
   else
-    return Path:new(conda_exe):parent():parent() .. '/envs'
+    return Path:new(conda_exe):parent():parent() / 'envs'
   end
 end
 
