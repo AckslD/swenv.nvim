@@ -151,6 +151,24 @@ local get_micromamba_base_path = function()
   end
 end
 
+local get_poetry_venvs_base_path = function()
+  local which_poetry = io.popen('which poetry')
+  which_poetry = which_poetry:read('*all')
+  if which_poetry == '' then
+    return nil
+  end
+  local p_file = io.popen('poetry config virtualenvs.path') 
+  
+  local poetry_root_prefix = p_file:read('*all')
+  poetry_root_prefix = string.gsub(poetry_root_prefix, "%s+", "")
+  if poetry_root_prefix == '' then
+    return nil
+  else
+    local base_path = Path:new(poetry_root_prefix) .. ''
+    return base_path
+  end
+end
+
 local get_pyenv_base_path = function()
   local pyenv_root = vim.fn.getenv('PYENV_ROOT')
   if pyenv_root == vim.NIL then
@@ -169,6 +187,7 @@ M.get_venvs = function(venvs_path)
   vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
+  vim.list_extend(venvs, get_venvs_for(get_poetry_venvs_base_path(), 'poetry'))
   return venvs
 end
 
