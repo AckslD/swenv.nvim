@@ -8,6 +8,7 @@ local read_venv_name_common_dir = require('swenv.project').read_venv_name_common
 local get_local_venv_path = require('swenv.project').get_local_venv_path
 
 local settings = require('swenv.config').settings
+local create = require('swenv.create')
 
 local ORIGINAL_PATH = vim.fn.getenv('PATH')
 local IS_WINDOWS = vim.uv.os_uname().sysname == 'Windows_NT'
@@ -28,7 +29,7 @@ local update_path = function(path)
   vim.fn.setenv('PATH', Path:new(path) / dir .. sep .. ORIGINAL_PATH)
 end
 
-local set_venv = function(venv)
+M.set_venv_path = function(venv)
   if venv.source == 'conda' or venv.source == 'micromamba' then
     vim.fn.setenv('CONDA_PREFIX', venv.path)
     vim.fn.setenv('CONDA_DEFAULT_ENV', venv.name)
@@ -189,7 +190,7 @@ M.pick_venv = function()
     if not choice then
       return
     end
-    set_venv(choice)
+    M.set_venv_path(choice)
   end)
 end
 
@@ -236,35 +237,47 @@ M.set_venv = function(name)
   if not closest_match then
     return
   end
-  set_venv(closest_match)
+  M.set_venv_path(closest_match)
 end
 
-M.auto_venv = function()
-  -- the function tries to activate in-project venvs, if present. Otherwise it tries to activate a venv in venvs folder
-  -- which best matches the project name.
-  local loaded, project_nvim = pcall(require, 'project_nvim.project')
-  local venvs = settings.get_venvs(settings.venvs_path)
-  if not loaded then
-    print('Error: failed to load the project_nvim.project module')
-    return
-  end
-
+---
+---@param project_nvim function project_nvim.project function
+---@param venvs table list of venvs
+local auto_venv_project_nvim = function(project_nvim, venvs)
   local project_dir, _ = project_nvim.get_project_root()
   if project_dir then -- project_nvim.get_project_root might not always return a project path
     local venv_name = read_venv_name_in_project(project_dir)
     if venv_name then
       local venv = { path = get_local_venv_path(project_dir), name = venv_name }
-      set_venv(venv)
+      M.set_venv_path(venv)
       return
     end
     venv_name = read_venv_name_common_dir(project_dir)
     if venv_name then
       local venv = best_match(venvs, venv_name)
       if venv then
-        set_venv(venv)
+        M.set_venv_path(venv)
         return
       end
     end
+  end
+end
+
+M.auto_venv = function()
+  -- If enabled then attempt to create and set a new venv directory
+  if settings.auto_create_venv then
+    create.auto_create_set_python_venv()
+    return
+  end
+
+  -- activate in-project venvs via project_nvim if present.
+  -- Otherwise it tries to activate a venv in venvs folder
+  -- which best matches the project name.
+  local project_nvim_loaded, project_nvim = pcall(require, 'project_nvim.project')
+  local venvs = settings.get_venvs(settings.venvs_path)
+  if project_nvim_loaded then
+    auto_venv_project_nvim(project_nvim, venvs)
+    return
   end
 end
 

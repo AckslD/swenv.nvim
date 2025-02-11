@@ -11,6 +11,14 @@ M.settings = {
   venvs_path = vim.fn.expand('~/venvs'),
   -- Something to do after setting an environment
   post_set_venv = nil,
+  -- Attempt detect and auto create venv directories using
+  -- pdm
+  -- requirements.txt
+  -- dev-requirements.txt
+  -- pyproject.toml
+  auto_create_venv = false,
+  -- directory to create for venv auto creation
+  auto_create_venv_dir = '.venv',
 }
 
 return M

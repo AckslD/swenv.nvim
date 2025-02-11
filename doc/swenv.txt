@@ -64,17 +64,47 @@ environment to the best match.
 
 AUTO ENVIRONMENT ~
 
+>lua
+    require('swenv.api').auto_venv()
+<
+
 Using a file named **.venv** in your projects root folder, it will
 automatically set the virtual-env for such environment.
 
 
-DEPENDENCY
+PROJECT.NVIM
 
-This requires you to have the project_nvim
-<https://github.com/ahmedkhalf/project.nvim> package installed.
+With project_nvim <https://github.com/ahmedkhalf/project.nvim> installed
+swenv.nvim will activate in-project venvs if present.
+
+This integration is skipped if `auto_create_venv` is enabled
+
+
+AUTO CREATE VENV
+
+You can have swenv.nvim attempt to create a venv directory and set to it.
+
+swenv.nvim will search up for a file containing dependencies and create a new
+venv directory set to `auto_create_venv_dir`
+
+Supported install types in order:
+
+- `pdm sync` with `pdm.lock` (does not modify pdm settings. You need to set the venv directory in pdm)
+
+
+  These require the `venv` module in python:
+- `pip install` with `requirements.txt`
+- `pip install` with `dev-requirements.txt` (preferred over requirements.txt)
+- `pip install` with `pyproject.toml`
 
 >lua
-    require('swenv.api').auto_venv()
+    
+    require('swenv').setup({
+        -- attempt to auto create and set a venv from dependencies
+        auto_create_venv = true,
+        -- name of venv directory to create if using pip
+        auto_create_venv_dir = ".venv"
+    })
 <
 
 
@@ -116,6 +146,33 @@ These are the defaults:
       -- Something to do after setting an environment, for example call vim.cmd.LspRestart
       post_set_venv = nil,
     })
+<
+
+
+RELOAD LSP CLIENT ON SETTING VENV ~
+
+You can get your lsp client by name and reload the client after setting the
+venv.
+
+>lua
+    post_set_venv = function()
+      local client = vim.lsp.get_clients({ name = "basedpyright" })[1]
+      if not client then
+        return
+      end
+      local venv = require("swenv.api").get_current_venv()
+      if not venv then
+        return
+      end
+      local venv_python = venv.path .. "/bin/python"
+      if client.settings then
+        client.settings = vim.tbl_deep_extend("force", client.settings, { python = { pythonPath = venv_python } })
+      else
+        client.config.settings =
+            vim.tbl_deep_extend("force", client.config.settings, { python = { pythonPath = venv_python } })
+      end
+      client.notify("workspace/didChangeConfiguration", { settings = nil })
+    end,
 <
 
 
