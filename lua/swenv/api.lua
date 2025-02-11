@@ -12,7 +12,9 @@ local create = require('swenv.create')
 
 local ORIGINAL_PATH = vim.fn.getenv('PATH')
 local IS_WINDOWS = vim.uv.os_uname().sysname == 'Windows_NT'
-local current_venv = nil
+local ORIGINAL_VIRTUAL_ENV = vim.fn.getenv('VIRTUAL_ENV')
+local ORIGINAL_CONDA_PREFIX = vim.fn.getenv('CONDA_PREFIX')
+local ORIGINAL_CONDA_DEFAULT_ENV = vim.fn.getenv('CONDA_DEFAULT_ENV')
 
 local update_path = function(path)
   local sep
@@ -98,7 +100,10 @@ local get_venvs_for = function(base_path, source, opts)
   if base_path == nil then
     return venvs
   end
-  local paths = scan_dir(base_path, vim.tbl_extend('force', { depth = 1, only_dirs = true, silent = true }, opts or {}))
+  local paths = scan_dir(
+    base_path,
+    vim.tbl_extend('force', { depth = 1, only_dirs = true, silent = true }, opts or {})
+  )
   for _, path in ipairs(paths) do
     table.insert(venvs, {
       name = Path:new(path):make_relative(base_path),
@@ -111,7 +116,7 @@ end
 
 local get_pixi_base_path = function()
   local current_dir = vim.fn.getcwd()
-  local pixi_root = Path:new(current_dir) / '.pixi'
+  local pixi_root = Path:new(current_dir):joinpath('.pixi')
 
   if not pixi_root:exists() then
     return nil
@@ -125,7 +130,7 @@ local get_conda_base_path = function()
   if conda_exe == vim.NIL then
     return nil
   else
-    return Path:new(conda_exe):parent():parent() / 'envs'
+    return Path:new(conda_exe):parent():parent():joinpath('envs')
   end
 end
 
@@ -147,7 +152,7 @@ local get_micromamba_base_path = function()
   if micromamba_root_prefix == vim.NIL then
     return nil
   else
-    return Path:new(micromamba_root_prefix) / 'envs'
+    return Path:new(micromamba_root_prefix).joinpath('envs')
   end
 end
 
@@ -156,7 +161,7 @@ local get_pyenv_base_path = function()
   if pyenv_root == vim.NIL then
     return nil
   else
-    return Path:new(pyenv_root) / 'versions'
+    return Path:new(pyenv_root).joinpath('versions')
   end
 end
 
@@ -168,7 +173,10 @@ M.get_venvs = function(venvs_path)
   vim.list_extend(venvs, get_conda_base_env())
   vim.list_extend(venvs, get_venvs_for(get_micromamba_base_path(), 'micromamba'))
   vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv'))
-  vim.list_extend(venvs, get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false }))
+  vim.list_extend(
+    venvs,
+    get_venvs_for(get_pyenv_base_path(), 'pyenv', { only_dirs = false })
+  )
   return venvs
 end
 
@@ -184,6 +192,43 @@ M.pick_venv = function()
     end
     M.set_venv_path(choice)
   end)
+end
+
+M.reset_venv = function()
+  -- Reset PATH to original value
+  vim.fn.setenv('PATH', ORIGINAL_PATH)
+
+  -- Reset virtual environment variables
+  if ORIGINAL_VIRTUAL_ENV ~= vim.NIL then
+    vim.fn.setenv('VIRTUAL_ENV', ORIGINAL_VIRTUAL_ENV)
+  else
+    vim.fn.setenv('VIRTUAL_ENV', nil)
+  end
+
+  -- Reset Conda environment variables
+  if ORIGINAL_CONDA_PREFIX ~= vim.NIL then
+    vim.fn.setenv('CONDA_PREFIX', ORIGINAL_CONDA_PREFIX)
+  else
+    vim.fn.setenv('CONDA_PREFIX', nil)
+  end
+
+  if ORIGINAL_CONDA_DEFAULT_ENV ~= vim.NIL then
+    vim.fn.setenv('CONDA_DEFAULT_ENV', ORIGINAL_CONDA_DEFAULT_ENV)
+  else
+    vim.fn.setenv('CONDA_DEFAULT_ENV', nil)
+  end
+
+  -- Reset current_venv
+  current_venv = nil
+
+  if settings.post_reset_venv then
+    settings.post_reset_venv()
+  end
+
+  vim.notify(
+    'Virtual environment has been reset to the original Python version.',
+    vim.log.levels.INFO
+  )
 end
 
 M.set_venv = function(name)
